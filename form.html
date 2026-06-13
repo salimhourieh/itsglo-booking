@@ -110,7 +110,7 @@
 
 <body class="bg-transparent flex items-start justify-center min-h-screen p-4 sm:p-6 font-sans">
 
-  <div id="formCard" class="relative w-full max-w-[560px] px-0 pt-6 pb-4">
+  <div id="formCard" class="relative w-full max-w-[560px] px-0 pt-6 pb-4 sm:my-auto">
 
     <!-- Progress header — commented out while form is single-step -->
     <!--
@@ -621,6 +621,14 @@
     // ── Config ──────────────────────────────────────────────────────
     const BOOKING_URL = 'https://itsglocleaning.ca/booknow';
     const GHL_WEBHOOK = 'https://services.leadconnectorhq.com/hooks/YyG1ntguFgRycKlmwAQ9/webhook-trigger/697bee34-c728-4d37-ac69-b8817444af32';
+    // Portal lead capture — POSTed ALONGSIDE GHL so itsGLO owns its
+    // top-of-funnel data (lead volume, repeat submitters, conversion).
+    // Purely additive: the GHL webhook and the BookingKoala redirect below
+    // are unchanged. LEAD_INTAKE_KEY is matched against
+    // settings.WEBSITE_INTAKE_KEY on the backend — a spam-friction barrier,
+    // not a true secret (same public key the careers form ships).
+    const LEAD_INTAKE_URL = 'https://itsglo-backend.onrender.com/api/v1/intake/lead/';
+    const LEAD_INTAKE_KEY = 'l6bOsT27Ws1XXESGe2CXqGBAXcyRsEOm_lUN6ziSTsI';
     const CITIES = [
       { id: '2', name: 'Toronto',        lat: 43.651, lng: -79.383 },
       { id: '3', name: 'Richmond Hill',  lat: 43.882, lng: -79.440 },
@@ -941,6 +949,26 @@
           ForGHLFirstName: firstName,
           ForGHLLastName: lastName,
           ServiceType: selectedServiceName,
+        }),
+      }).catch(() => {});
+      // Second, additive capture into the itsGLO portal (lead funnel).
+      // keepalive:true so it survives the redirect below; failure is
+      // swallowed so it can never block the customer's booking.
+      fetch(LEAD_INTAKE_URL, {
+        method: 'POST',
+        mode: 'cors',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json', 'X-Intake-Key': LEAD_INTAKE_KEY },
+        body: JSON.stringify({
+          firstName: firstName,
+          lastName: lastName,
+          fullName: `${firstName} ${lastName}`,
+          email: email,
+          phone: phone,
+          service_type: selectedServiceName,
+          city: selectedCityName,
+          location: selectedLocation,
+          src: new URLSearchParams(location.search).get('src') || '',
         }),
       }).catch(() => {});
       const parts = [
