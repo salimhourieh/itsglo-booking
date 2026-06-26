@@ -960,7 +960,7 @@
           ForGHLLastName: lastName,
           ServiceType: selectedServiceName,
         }),
-      }).catch(() => {});
+      }).catch(() => { try { gtag('event', 'lead_capture_failed', { endpoint: 'ghl' }); } catch (e) {} });
       // Second, additive capture into the itsGLO portal (lead funnel).
       // keepalive:true so it survives the redirect below; failure is
       // swallowed so it can never block the customer's booking.
@@ -980,7 +980,7 @@
           location: selectedLocation,
           src: new URLSearchParams(location.search).get('src') || '',
         }),
-      }).catch(() => {});
+      }).catch(() => { try { gtag('event', 'lead_capture_failed', { endpoint: 'portal' }); } catch (e) {} });
       const parts = [
         `location=${selectedLocation}`,
         `f_name=${encodeURIComponent(firstName)}`,
