@@ -1004,6 +1004,8 @@
         a.href = bookingUrl;
         a.style.display = 'none';
         document.body.appendChild(a);
+        // The GA linker decorates on mousedown, so fire it before the click like a real tap.
+        a.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
         a.click();
       } catch (e) {
         window.location.href = bookingUrl;
