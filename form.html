@@ -637,11 +637,8 @@
   <script>
     // ── Config ──────────────────────────────────────────────────────
     const BOOKING_URL = 'https://itsglocleaning.ca/booknow';
-    const GHL_WEBHOOK = 'https://services.leadconnectorhq.com/hooks/YyG1ntguFgRycKlmwAQ9/webhook-trigger/697bee34-c728-4d37-ac69-b8817444af32';
-    // Portal lead capture — POSTed ALONGSIDE GHL so itsGLO owns its
-    // top-of-funnel data (lead volume, repeat submitters, conversion).
-    // Purely additive: the GHL webhook and the BookingKoala redirect below
-    // are unchanged. LEAD_INTAKE_KEY is matched against
+    // Portal lead capture — itsGLO owns its top-of-funnel data (lead
+    // volume, repeat submitters, conversion). LEAD_INTAKE_KEY is matched against
     // settings.WEBSITE_INTAKE_KEY on the backend — a spam-friction barrier,
     // not a true secret (same public key the careers form ships).
     const LEAD_INTAKE_URL = 'https://itsglo-backend-va.onrender.com/api/v1/intake/lead/';
@@ -950,25 +947,7 @@
       const email    = document.getElementById('email').value.trim();
       const rawPhone = phone.replace(/\D/g, '');
       gtag('event', 'form_submitted', { city: selectedCityName });
-      fetch(GHL_WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        keepalive: true,
-        body: JSON.stringify({
-          Form: { Id: '4', InternalName: 'GetYourInstantCleaningQuote', Name: 'Get Your Instant Cleaning Quote' },
-          Logistics: {
-            YourName: { First: firstName, FirstAndLast: `${firstName} ${lastName}`, Last: lastName, Middle: null, MiddleInitial: null, Prefix: null, Suffix: null },
-            EmailOld: null, PhoneOld: null,
-          },
-          Email: email,
-          Phone: phone,
-          ForBKNumber: rawPhone,
-          ForGHLFirstName: firstName,
-          ForGHLLastName: lastName,
-          ServiceType: selectedServiceName,
-        }),
-      }).catch(() => { try { gtag('event', 'lead_capture_failed', { endpoint: 'ghl' }); } catch (e) {} });
-      // Second, additive capture into the itsGLO portal (lead funnel).
+      // Capture the lead into the itsGLO portal (lead funnel).
       // keepalive:true so it survives the redirect below; failure is
       // swallowed so it can never block the customer's booking.
       fetch(LEAD_INTAKE_URL, {
