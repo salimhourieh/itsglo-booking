@@ -996,7 +996,18 @@
         `email=${encodeURIComponent(email)}`,
         ...(selectedService ? [`service_id=${selectedService}`] : []),
       ];
-      window.location.href = `${BOOKING_URL}?${parts.join('&')}#elem_0_vi46`;
+      // Navigate via a real anchor click (not location.href) so the GA4 cross-domain
+      // linker can append _gl and keep one user/session across to BookingKoala.
+      const bookingUrl = `${BOOKING_URL}?${parts.join('&')}#elem_0_vi46`;
+      try {
+        const a = document.createElement('a');
+        a.href = bookingUrl;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+      } catch (e) {
+        window.location.href = bookingUrl;
+      }
     }
 
     /* ── Multi-step functions — commented out while form is single-step ──────
