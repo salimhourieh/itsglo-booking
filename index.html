@@ -2,6 +2,15 @@
 <html lang="en">
 
 <head>
+  <!-- Security: only the hosts this page needs may run code or receive data. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://code.iconify.design https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com https://*.g.doubleclick.net; connect-src 'self' https://itsglo-backend-va.onrender.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://api.iconify.design https://api.simplesvg.com https://api.unisvg.com; object-src 'none'; base-uri 'none'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <script>
+    // Never collect a lead over plain http (anyone on the network could read or alter it).
+    if (location.protocol === 'http:' && location.hostname === 'book.itsglocleaning.ca') {
+      location.replace('https://' + location.host + location.pathname + location.search + location.hash);
+    }
+  </script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EFL5KHBP13"></script>
   <script>
@@ -27,8 +36,8 @@
     href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap"
     rel="stylesheet" />
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+  <script src="tailwind-3.4.17.js"></script>
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js" integrity="sha384-GPb5RlngihS9H0z1D137JsvzmeZ7tCpWEF4t5YDoTZyMsPP8S7h7vFDh4XhheU83" crossorigin="anonymous"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -220,7 +229,10 @@
               class="h-12 border-2 border-slate-200 rounded-xl px-3.5 text-base text-slate-800 bg-white transition-colors placeholder:text-slate-300" />
             <span id="phoneErr" class="hidden text-[13px] text-red-500">Please enter a valid phone number</span>
           </div>
-          <div class="flex flex-col gap-1.5">
+          <div aria-hidden="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">
+              <label>Leave this empty<input type="text" id="company_url" name="company_url" tabindex="-1" autocomplete="off" /></label>
+            </div>
+            <div class="flex flex-col gap-1.5">
             <label class="text-[13px] font-semibold text-slate-500 uppercase tracking-widest">Email</label>
             <input type="email" id="email" placeholder="jane@example.com" inputmode="email" autocomplete="email" oninput="checkStep1Cta();"
               class="h-12 border-2 border-slate-200 rounded-xl px-3.5 text-base text-slate-800 bg-white transition-colors placeholder:text-slate-300" />
@@ -966,6 +978,7 @@
           city: selectedCityName,
           location: selectedLocation,
           src: new URLSearchParams(location.search).get('src') || '',
+          company_url: (document.getElementById('company_url') || {}).value || '',
         }),
       }).catch(() => { try { gtag('event', 'lead_capture_failed', { endpoint: 'portal' }); } catch (e) {} });
       const parts = [
